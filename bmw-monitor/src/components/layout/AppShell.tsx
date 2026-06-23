@@ -7,14 +7,13 @@ import { useMonitorData } from '@/hooks/useMonitorData'
 import { Loader2 } from 'lucide-react'
 import type { ActiveTab } from '@/types'
 
-const OverviewTab  = dynamic(() => import('@/components/tabs/OverviewTab'))
-const PrensaTab    = dynamic(() => import('@/components/tabs/PrensaTab'))
-const ModelosTab   = dynamic(() => import('@/components/tabs/ModelosTab'))
-const TopicosTab   = dynamic(() => import('@/components/tabs/TopicosTab'))
-const AIRadarTab   = dynamic(() => import('@/components/tabs/AIRadarTab'))
+const BriefingTab     = dynamic(() => import('@/components/tabs/BriefingTab'))
+const PrensaTab       = dynamic(() => import('@/components/tabs/PrensaTab'))
+const AIRadarTab      = dynamic(() => import('@/components/tabs/AIRadarTab'))
+const CompetidoresTab = dynamic(() => import('@/components/tabs/CompetidoresTab'))
 
 export default function AppShell() {
-  const [activeTab, setActiveTab] = useState<ActiveTab>('overview')
+  const [activeTab, setActiveTab] = useState<ActiveTab>('briefing')
   const { data, loading, error } = useMonitorData()
 
   return (
@@ -36,11 +35,10 @@ export default function AppShell() {
         )}
         {data && (
           <div className="p-6" key={activeTab}>
-            {activeTab === 'overview'   && <OverviewTab  mediaStats={data.mediaStats} aiStats={data.aiStats} />}
-            {activeTab === 'prensa'     && <PrensaTab    articles={data.recentArticles} />}
-            {activeTab === 'modelos'    && <ModelosTab   mediaStats={data.mediaStats} aiStats={data.aiStats} />}
-            {activeTab === 'topicos'    && <TopicosTab   mediaStats={data.mediaStats} />}
-            {activeTab === 'ai-radar'   && <AIRadarTab   aiStats={data.aiStats} recentQueries={data.recentQueries} />}
+            {activeTab === 'briefing'      && <BriefingTab     briefing={data.briefing} mediaStats={data.mediaStats} aiStats={data.aiStats} />}
+            {activeTab === 'ai-radar'      && <AIRadarTab      aiStats={data.aiStats} recentQueries={data.recentQueries} />}
+            {activeTab === 'competidores'  && <CompetidoresTab mediaStats={data.mediaStats} aiStats={data.aiStats} />}
+            {activeTab === 'prensa'        && <PrensaTab       articles={data.recentArticles} />}
           </div>
         )}
       </main>

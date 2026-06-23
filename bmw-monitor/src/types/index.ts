@@ -64,8 +64,21 @@ export interface MonitorData {
   generatedAt: string
   mediaStats: MediaStats
   aiStats: AIStats
+  briefing: Briefing
   recentArticles: Article[]
   recentQueries: AIQueryResult[]
 }
 
-export type ActiveTab = 'overview' | 'prensa' | 'modelos' | 'topicos' | 'ai-radar' | 'tendencias'
+export interface BriefingAlert {
+  type: 'success' | 'warning' | 'alert' | 'info'
+  title: string
+  body: string
+  action: string
+}
+
+export interface Briefing {
+  insights: string[]
+  alerts: BriefingAlert[]
+}
+
+export type ActiveTab = 'briefing' | 'prensa' | 'ai-radar' | 'competidores'

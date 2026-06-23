@@ -147,6 +147,105 @@ def compute_ai_stats(ai_results: list[dict]) -> dict:
     }
 
 
+def generate_briefing(media_stats: dict, ai_stats: dict) -> dict:
+    insights = []
+    alerts = []
+
+    sov_week = media_stats.get("sovWeek", {})
+    sov_month = media_stats.get("sovMonth", {})
+    bmw_sov_w = sov_week.get("BMW", 0)
+    bmw_sov_m = sov_month.get("BMW", 0)
+
+    # Media leader insight
+    leader = max(sov_week, key=sov_week.get) if sov_week else "BMW"
+    if leader != "BMW":
+        leader_sov = sov_week[leader]
+        insights.append(f"{leader} lidera la conversación mediática esta semana con un {leader_sov}% de share of voice, frente al {bmw_sov_w}% de BMW.")
+        alerts.append({
+            "type": "warning",
+            "title": f"{leader} supera a BMW en cobertura mediática",
+            "body": f"{leader} acumula {leader_sov}% de SoV semanal vs {bmw_sov_w}% de BMW. La brecha es de {round(leader_sov - bmw_sov_w, 1)} puntos.",
+            "action": "Impulsar notas de prensa y contenido propio esta semana",
+        })
+    else:
+        insights.append(f"BMW lidera la conversación mediática esta semana con {bmw_sov_w}% de share of voice, por delante de {', '.join(b for b in sov_week if b != 'BMW')}.")
+        alerts.append({
+            "type": "success",
+            "title": "BMW lidera la cobertura mediática esta semana",
+            "body": f"{bmw_sov_w}% de SoV semanal — por encima de todos los competidores.",
+            "action": "Mantener ritmo de comunicación",
+        })
+
+    # Trend insight
+    trend = media_stats.get("trendVsLastWeek", 0)
+    if trend > 15:
+        insights.append(f"La cobertura de BMW ha subido un {trend}% respecto a la semana anterior.")
+        alerts.append({"type": "success", "title": f"Pico de cobertura BMW (+{trend}%)", "body": "La cobertura semanal supera significativamente la semana pasada.", "action": "Identificar qué noticia lo impulsó y amplificarla"})
+    elif trend < -15:
+        insights.append(f"La cobertura de BMW ha caído un {abs(trend)}% respecto a la semana anterior.")
+        alerts.append({"type": "warning", "title": f"Caída de cobertura BMW ({trend}%)", "body": "La presencia en medios ha bajado notablemente esta semana.", "action": "Activar comunicación proactiva o buscar ángulos noticiables"})
+
+    # Sentiment insight
+    sent = media_stats.get("sentimentBreakdown", {})
+    neg = sent.get("negative", 0)
+    total_sent = sum(sent.values()) or 1
+    if neg / total_sent > 0.15:
+        insights.append(f"El {round(neg/total_sent*100)}% de los artículos sobre BMW tienen tono negativo este mes — por encima del umbral recomendado del 15%.")
+        alerts.append({"type": "alert", "title": f"{neg} artículos con tono negativo sobre BMW", "body": "La cobertura negativa supera el umbral del 15%. Puede afectar la percepción de marca.", "action": "Revisar artículos negativos en Prensa e identificar el origen"})
+    elif sent.get("positive", 0) > neg * 2:
+        insights.append(f"El sentimiento en prensa es mayoritariamente positivo para BMW: {sent.get('positive',0)} artículos positivos vs {neg} negativos este mes.")
+
+    # AI insight
+    if ai_stats and ai_stats.get("totalQueries", 0) > 0:
+        rate = ai_stats["bmwAppearanceRate"]
+        rank = ai_stats.get("bmwAvgRank")
+        insights.append(f"La inteligencia artificial menciona BMW en el {rate}% de las preguntas sobre coches premium, con una posición media de #{rank} cuando aparece.")
+
+        comp_wins = ai_stats.get("competitorWins", [])
+        if comp_wins:
+            top_comp, wins = comp_wins[0]
+            total_q = ai_stats["totalQueries"]
+            pct = round(wins / total_q * 100)
+            if pct > 25:
+                alerts.append({
+                    "type": "warning",
+                    "title": f"La IA posiciona a {top_comp} antes que BMW en {pct}% de preguntas",
+                    "body": f"En {wins} de {total_q} preguntas analizadas, {top_comp} aparece en una posición superior a BMW.",
+                    "action": "Revisar pestaña AI Radar para ver en qué categorías se pierde",
+                })
+
+        # AI category alert: category where BMW loses most
+        by_cat = ai_stats.get("byCategory", {})
+        worst_cat = min(by_cat, key=lambda c: by_cat[c]["rate"]) if by_cat else None
+        if worst_cat:
+            worst_rate = by_cat[worst_cat]["rate"]
+            cat_labels = {
+                "recomendacion_general": "recomendación general",
+                "comparativa": "comparativas directas",
+                "electrico": "coches eléctricos",
+                "precio": "precio",
+                "fiabilidad": "fiabilidad",
+                "tecnologia": "tecnología",
+                "suv": "SUVs",
+            }
+            if worst_rate < 80:
+                alerts.append({
+                    "type": "info",
+                    "title": f"BMW solo aparece en el {worst_rate}% de preguntas sobre {cat_labels.get(worst_cat, worst_cat)}",
+                    "body": f"Es la categoría con menor presencia de BMW en las recomendaciones de IA.",
+                    "action": f"Reforzar contenido y noticias sobre {cat_labels.get(worst_cat, worst_cat)} para mejorar el posicionamiento en IA",
+                })
+
+    # Topic top insight
+    topics = media_stats.get("topicBreakdown", {})
+    if topics:
+        top_topic = max(topics, key=topics.get)
+        topic_labels = {"precio": "precio", "autonomia": "autonomía", "electrico": "vehículos eléctricos", "diseño": "diseño", "tecnologia": "tecnología", "fiabilidad": "fiabilidad", "conduccion": "conducción", "ventas": "ventas", "lanzamiento": "lanzamientos"}
+        insights.append(f"El tema más comentado en artículos sobre BMW este mes es '{topic_labels.get(top_topic, top_topic)}' ({topics[top_topic]} menciones).")
+
+    return {"insights": insights, "alerts": alerts}
+
+
 def build():
     articles = load_json(ARTICLES_PATH)
     ai_results = load_json(AI_SOV_PATH)
@@ -155,6 +254,7 @@ def build():
 
     media_stats = compute_media_stats(articles)
     ai_stats = compute_ai_stats(ai_results)
+    briefing = generate_briefing(media_stats, ai_stats)
 
     # Recent articles for the news feed (last 30 days, max 200)
     _month_ago = (date.today() - timedelta(days=30)).isoformat()
@@ -168,6 +268,7 @@ def build():
         "generatedAt": today,
         "mediaStats": media_stats,
         "aiStats": ai_stats,
+        "briefing": briefing,
         "recentArticles": recent_articles,
         "recentQueries": todays_queries,
     }

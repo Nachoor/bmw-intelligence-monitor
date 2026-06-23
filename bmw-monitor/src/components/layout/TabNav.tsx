@@ -1,14 +1,12 @@
 'use client'
-import { BarChart3, Newspaper, Car, Tags, Bot, TrendingUp } from 'lucide-react'
+import { FileText, Newspaper, Bot, BarChart2 } from 'lucide-react'
 import type { ActiveTab } from '@/types'
 
 const TABS: { id: ActiveTab; label: string; icon: React.ReactNode }[] = [
-  { id: 'overview',    label: 'Overview',    icon: <BarChart3 className="w-4 h-4" /> },
-  { id: 'prensa',      label: 'Prensa',      icon: <Newspaper className="w-4 h-4" /> },
-  { id: 'modelos',     label: 'Modelos',     icon: <Car className="w-4 h-4" /> },
-  { id: 'topicos',     label: 'Tópicos',     icon: <Tags className="w-4 h-4" /> },
-  { id: 'ai-radar',   label: 'AI Radar',    icon: <Bot className="w-4 h-4" /> },
-  { id: 'tendencias',  label: 'Tendencias',  icon: <TrendingUp className="w-4 h-4" /> },
+  { id: 'briefing',      label: 'Briefing',      icon: <FileText className="w-4 h-4" /> },
+  { id: 'ai-radar',     label: 'AI Radar',       icon: <Bot className="w-4 h-4" /> },
+  { id: 'competidores', label: 'Competidores',   icon: <BarChart2 className="w-4 h-4" /> },
+  { id: 'prensa',       label: 'Prensa',         icon: <Newspaper className="w-4 h-4" /> },
 ]
 
 interface Props { activeTab: ActiveTab; setActiveTab: (t: ActiveTab) => void }

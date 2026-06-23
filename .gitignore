@@ -6,3 +6,5 @@ __pycache__/
 bmw-monitor/.next/
 bmw-monitor/node_modules/
 bmw-monitor/.env.local
+
+.vercel
