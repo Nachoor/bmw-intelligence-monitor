@@ -19,23 +19,39 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 OUT_PATH = BASE_DIR / "bmw-monitor" / "public" / "data" / "articles.json"
 
 RSS_FEEDS = [
-    {"name": "Motor.es",      "url": "https://www.motor.es/rss/"},
-    {"name": "Autopista",     "url": "https://www.autopista.es/rss/"},
-    {"name": "Motorpasión",   "url": "https://www.motorpasion.es/rss.xml"},
-    {"name": "Diario Motor",  "url": "https://www.diariomotor.com/feed/"},
-    {"name": "Auto Bild ES",  "url": "https://www.autobild.es/rss"},
-    {"name": "Coches.net",    "url": "https://noticias.coches.net/feed/"},
-    {"name": "Km77",          "url": "https://www.km77.com/rss"},
-    {"name": "Autofácil",     "url": "https://www.autofacil.es/rss"},
-    {"name": "Top Gear ES",   "url": "https://www.topgear.com.es/rss"},
-    {"name": "El Confidencial Motor", "url": "https://www.elconfidencial.com/rss/tags/coches_6219.xml"},
+    {"name": "Diario Motor",       "url": "https://www.diariomotor.com/feed/"},
+    {"name": "Auto Bild ES",       "url": "https://www.autobild.es/rss"},
+    {"name": "Autofácil",          "url": "https://www.autofacil.es/rss"},
+    {"name": "Motor El País",      "url": "https://motor.elpais.com/rss/"},
+    {"name": "20minutos Motor",    "url": "https://www.20minutos.es/rss/motor.xml"},
+    {"name": "La Vanguardia Motor","url": "https://www.lavanguardia.com/rss/motor.xml"},
 ]
 
 GOOGLE_NEWS_QUERIES = [
+    # BMW
     "BMW España",
     "BMW eléctrico España",
     "BMW precio España",
-    "BMW nuevo modelo",
+    "BMW nuevo modelo España",
+    "BMW Serie 3 España",
+    "BMW X5 España",
+    # Audi
+    "Audi España",
+    "Audi eléctrico España",
+    "Audi precio España",
+    "Audi nuevo modelo España",
+    "Audi Q5 España",
+    "Audi e-tron España",
+    # Mercedes-Benz
+    "Mercedes-Benz España",
+    "Mercedes eléctrico España",
+    "Mercedes precio España",
+    "Mercedes nuevo modelo España",
+    "Mercedes Clase C España",
+    "Mercedes EQS España",
+    # Comparativas
+    "BMW Audi Mercedes comparativa España",
+    "coches premium lujo España 2025",
 ]
 
 BRANDS = {
@@ -48,8 +64,21 @@ BMW_MODELS = [
     "Serie 1", "Serie 2", "Serie 3", "Serie 4", "Serie 5", "Serie 6", "Serie 7", "Serie 8",
     "X1", "X2", "X3", "X4", "X5", "X6", "X7", "XM",
     "i3", "i4", "i5", "i7", "iX", "iX1", "iX3",
-    "M2", "M3", "M4", "M5", "M8",
-    "Z4", "MINI",
+    "M2", "M3", "M4", "M5", "M8", "Z4",
+]
+
+AUDI_MODELS = [
+    "A1", "A3", "A4", "A5", "A6", "A7", "A8",
+    "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8",
+    "e-tron", "Q4 e-tron", "Q8 e-tron",
+    "RS3", "RS4", "RS5", "RS6", "RS7",
+    "TT", "R8",
+]
+
+MERCEDES_MODELS = [
+    "Clase A", "Clase B", "Clase C", "Clase E", "Clase S",
+    "GLA", "GLB", "GLC", "GLE", "GLS", "EQA", "EQB", "EQC", "EQE", "EQS",
+    "AMG GT", "CLA", "CLS", "Sprinter",
 ]
 
 TOPICS = {
@@ -83,7 +112,6 @@ NEGATIVE_WORDS = {"problema", "fallo", "avería", "caro", "cuesta", "cara", "def
 
 
 def detect_brands(text: str) -> list[str]:
-    text_lower = text.lower()
     found = []
     for brand, pattern in BRANDS.items():
         if re.search(pattern, text, re.IGNORECASE):
@@ -91,11 +119,20 @@ def detect_brands(text: str) -> list[str]:
     return found
 
 
-def detect_bmw_models(text: str) -> list[str]:
+def detect_models(text: str, brands: list[str]) -> list[str]:
     found = []
-    for model in BMW_MODELS:
-        if re.search(rf"\b{re.escape(model)}\b", text, re.IGNORECASE):
-            found.append(model)
+    if "BMW" in brands:
+        for model in BMW_MODELS:
+            if re.search(rf"\b{re.escape(model)}\b", text, re.IGNORECASE):
+                found.append(model)
+    if "Audi" in brands:
+        for model in AUDI_MODELS:
+            if re.search(rf"\b{re.escape(model)}\b", text, re.IGNORECASE):
+                found.append(model)
+    if "Mercedes-Benz" in brands:
+        for model in MERCEDES_MODELS:
+            if re.search(rf"\b{re.escape(model)}\b", text, re.IGNORECASE):
+                found.append(model)
     return found
 
 
@@ -132,9 +169,10 @@ def parse_date(entry) -> str:
 
 def fetch_feed(source: dict) -> list[dict]:
     try:
-        feed = feedparser.parse(source["url"])
+        r = requests.get(source["url"], timeout=12, headers={"User-Agent": "Mozilla/5.0"})
+        feed = feedparser.parse(r.text)
         articles = []
-        for entry in feed.entries[:30]:
+        for entry in feed.entries[:50]:
             text = f"{entry.get('title', '')} {entry.get('summary', '')}"
             brands = detect_brands(text)
             if not brands:
@@ -147,7 +185,7 @@ def fetch_feed(source: dict) -> list[dict]:
                 "source": source["name"],
                 "publishedAt": parse_date(entry),
                 "brands": brands,
-                "models": detect_bmw_models(text) if "BMW" in brands else [],
+                "models": detect_models(text, brands),
                 "topics": detect_topics(text),
                 "sentiment": detect_sentiment(text),
             })
@@ -197,7 +235,6 @@ def load_existing() -> list[dict]:
 
 def save(articles: list[dict]):
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    # Merge with existing, keep last 30 days (~900 articles max)
     existing = {a["id"]: a for a in load_existing()}
     for a in articles:
         existing[a["id"]] = a
