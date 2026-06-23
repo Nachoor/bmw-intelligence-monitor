@@ -7,7 +7,6 @@ interface Props { mediaStats: MediaStats; aiStats: AIStats }
 
 const BRAND_COLORS: Record<string, string> = {
   BMW: '#3b82f6', Audi: '#ef4444', 'Mercedes-Benz': '#94a3b8',
-  Tesla: '#10b981', Porsche: '#f59e0b', Volvo: '#8b5cf6', Lexus: '#06b6d4',
 }
 
 const SENTIMENT_COLORS = { positive: '#10b981', neutral: '#64748b', negative: '#ef4444' }

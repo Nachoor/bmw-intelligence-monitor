@@ -42,10 +42,6 @@ BRANDS = {
     "BMW":           r"\bBMW\b",
     "Audi":          r"\bAudi\b",
     "Mercedes-Benz": r"\bMercedes(?:-Benz)?\b",
-    "Tesla":         r"\bTesla\b",
-    "Porsche":       r"\bPorsche\b",
-    "Volvo":         r"\bVolvo\b",
-    "Lexus":         r"\bLexus\b",
 }
 
 BMW_MODELS = [

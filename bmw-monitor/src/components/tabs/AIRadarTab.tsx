@@ -17,7 +17,6 @@ const CAT_LABELS: Record<string, string> = {
 
 const BRAND_COLORS: Record<string, string> = {
   BMW: '#3b82f6', Audi: '#ef4444', 'Mercedes-Benz': '#94a3b8',
-  Tesla: '#10b981', Porsche: '#f59e0b',
 }
 
 function QueryCard({ q }: { q: AIQueryResult }) {

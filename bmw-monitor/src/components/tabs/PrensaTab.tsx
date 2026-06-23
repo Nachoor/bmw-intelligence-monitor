@@ -12,7 +12,6 @@ const SENTIMENT_STYLES = {
 
 const BRAND_COLORS: Record<string, string> = {
   BMW: 'text-blue-400', Audi: 'text-red-400', 'Mercedes-Benz': 'text-slate-300',
-  Tesla: 'text-green-400', Porsche: 'text-amber-400',
 }
 
 const TOPIC_LABELS: Record<string, string> = {

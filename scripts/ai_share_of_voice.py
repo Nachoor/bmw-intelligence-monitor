@@ -16,7 +16,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parents[1]
 OUT_PATH = BASE_DIR / "bmw-monitor" / "public" / "data" / "ai_sov.json"
 
-BRANDS = ["BMW", "Audi", "Mercedes-Benz", "Tesla", "Porsche", "Volvo", "Lexus"]
+BRANDS = ["BMW", "Audi", "Mercedes-Benz"]
 
 BMW_MODELS = [
     "Serie 1", "Serie 2", "Serie 3", "Serie 4", "Serie 5", "Serie 7",

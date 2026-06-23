@@ -1,4 +1,4 @@
-export type Brand = 'BMW' | 'Audi' | 'Mercedes-Benz' | 'Tesla' | 'Porsche' | 'Volvo' | 'Lexus'
+export type Brand = 'BMW' | 'Audi' | 'Mercedes-Benz'
 export type Sentiment = 'positive' | 'neutral' | 'negative'
 export type LLM = 'groq' | 'gemini'
 

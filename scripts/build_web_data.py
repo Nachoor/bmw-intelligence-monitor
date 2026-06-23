@@ -15,7 +15,7 @@ ARTICLES_PATH = BASE_DIR / "bmw-monitor" / "public" / "data" / "articles.json"
 AI_SOV_PATH   = BASE_DIR / "bmw-monitor" / "public" / "data" / "ai_sov.json"
 OUT_PATH       = BASE_DIR / "bmw-monitor" / "public" / "data" / "monitor_data.json"
 
-BRANDS = ["BMW", "Audi", "Mercedes-Benz", "Tesla", "Porsche", "Volvo", "Lexus"]
+BRANDS = ["BMW", "Audi", "Mercedes-Benz"]
 TOPICS = ["precio", "autonomia", "electrico", "diseño", "tecnologia", "fiabilidad", "conduccion", "ventas", "lanzamiento"]
 
 
