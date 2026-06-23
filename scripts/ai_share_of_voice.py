@@ -13,6 +13,8 @@ import time
 from datetime import date
 from pathlib import Path
 
+import requests
+
 BASE_DIR = Path(__file__).resolve().parents[1]
 OUT_PATH = BASE_DIR / "bmw-monitor" / "public" / "data" / "ai_sov.json"
 
@@ -129,15 +131,14 @@ def query_groq(question: str) -> str | None:
         print("  GROQ_API_KEY not set, skipping Groq")
         return None
     try:
-        from groq import Groq
-        client = Groq(api_key=api_key)
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": question}],
-            max_tokens=400,
-            temperature=0.3,
+        resp = requests.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json={"model": "llama-3.3-70b-versatile", "messages": [{"role": "user", "content": question}], "max_tokens": 400, "temperature": 0.3},
+            timeout=30,
         )
-        return response.choices[0].message.content
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"]
     except Exception as e:
         print(f"  Groq error: {e}")
         return None
