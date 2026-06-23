@@ -61,6 +61,7 @@ def compute_media_stats(articles: list[dict]) -> dict:
 
     return {
         "totalArticles": len(monthly),
+        "archiveTotal": len(articles),
         "bmwArticles": len(bmw_articles),
         "sovWeek": sov(recent),
         "sovMonth": sov(monthly),
@@ -155,9 +156,9 @@ def build():
     media_stats = compute_media_stats(articles)
     ai_stats = compute_ai_stats(ai_results)
 
-    # Recent articles for the news feed (last 48h, max 50)
-    two_days_ago = (date.today() - timedelta(days=2)).isoformat()
-    recent_articles = [a for a in articles if a.get("publishedAt", "") >= two_days_ago][:50]
+    # Recent articles for the news feed (last 30 days, max 200)
+    _month_ago = (date.today() - timedelta(days=30)).isoformat()
+    recent_articles = [a for a in articles if a.get("publishedAt", "") >= _month_ago][:200]
 
     # Recent AI queries (today, for the radar view)
     today = date.today().isoformat()
