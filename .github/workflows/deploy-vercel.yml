@@ -1,0 +1,21 @@
+name: Deploy Vercel
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel deploy
+        env:
+          VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK_MONITOR }}
+        run: |
+          if [ -z "$VERCEL_DEPLOY_HOOK" ]; then
+            echo "VERCEL_DEPLOY_HOOK_MONITOR not configured."
+            exit 1
+          fi
+          curl -fsS -X POST "$VERCEL_DEPLOY_HOOK" -o /dev/null -w "HTTP %{http_code}\n"
